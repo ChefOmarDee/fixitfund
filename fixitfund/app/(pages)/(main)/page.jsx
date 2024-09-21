@@ -243,9 +243,9 @@ export default function Home() {
         <h3 className ={'text-white text-[20px] font-medium max-md:text-[16px] max-md:text-center'} >Your one stop shop for improving your community</h3>
       </div>
       <div className="w-full bg-[#94DBFF] py-8">
-        <div ref={mapContainer} className="map-container mx-auto rounded-lg shadow-lg" style={{ height: '500px', width: '80%', maxWidth: '1200px' }} />
+        <div ref={mapContainer} className="map-container mx-auto rounded-lg shadow-lg" style={{ height: '550px', width: '80%', maxWidth: '1200px' }} />
       </div>
-      <div className = {'bg-[#FFFAF1] flex flex-row items-center py-4 justify-evenly'}>
+      <div className = {'bg-[#FFFAF1] flex flex-row items-center py-10 justify-evenly'}>
         <Select
         closeMenuOnSelect={false}
         options={statusOptions}
