@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import Link from 'next/link';
+
 
 export default function ProjectDetails({params}){
     const [data, setData] = useState(null);
@@ -49,8 +51,8 @@ export default function ProjectDetails({params}){
             setPicUrl(projectResult.PictureURL);
             setStatus(projectResult.Status);
             setTag(projectResult.Tag);
-            setCost(projectResult.cost);
-            setDonated(projectResult.Donated);
+            setCost(parseFloat(projectResult.cost?.$numberDecimal || 0));
+            setDonated(parseFloat(projectResult.Donated?.$numberDecimal || 0));
 
   
       
@@ -135,7 +137,7 @@ return (
             <img 
                 src={picUrl}
                 alt="Campaign Image" 
-                className="w-full h-auto mb-6 rounded-lg"
+                className="w-full mb-6 rounded-lg h-96"
             />
             
             <div className="w-full bg-white shadow-md rounded-lg overflow-hidden">
