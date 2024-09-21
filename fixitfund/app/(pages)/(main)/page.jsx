@@ -31,7 +31,7 @@ export default function Home() {
   let [statusInput, setStatus] = useState('');
   const router = useRouter();
   const hasMounted = useRef(false);
-	const [isNotLoggedIn, setNotLoggedIn] = useState();
+  const [isNotLoggedIn, setNotLoggedIn] = useState();
   const token =  typeof window !== "undefined" ? localStorage.getItem("Token") : null;
 
   const statusOptions = [
@@ -43,10 +43,9 @@ export default function Home() {
 
   const mapContainer = useRef(null);
   const map = useRef(null);
-  const [lng, setLng] = useState(-80.1002);
-  const [lat, setLat] = useState(26.3746);
-  const [zoom, setZoom] = useState(6);
-
+  const [lng, setLng] = useState(-80.293133);
+  const [lat, setLat] = useState(26.2023023);
+  const [zoom, setZoom] = useState(8);
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -122,10 +121,9 @@ export default function Home() {
 
   useEffect(() => {
     if (hasMounted.current) {
-      // Call your function only after the component has mounted and `statusInput` changes
       fetchProjectsWithQuery();
     } else {
-      hasMounted.current = true; // Set to true after the first render
+      hasMounted.current = true;
     }
   }, [statusInput]);
 
@@ -147,9 +145,9 @@ export default function Home() {
       console.log("hi")
       CheckUser();
     }
-  })
+  }, [isNotLoggedIn])
 
-    useEffect(() => {
+  useEffect(() => {
     if (map.current) return; // initialize map only once
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
@@ -161,16 +159,82 @@ export default function Home() {
     // Add navigation control (the +/- zoom buttons)
     map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-    // Create markers for each project
-    projectArray.forEach((project) => {
-      if (project.Longitude && project.Latitude) {
-        new mapboxgl.Marker()
-          .setLngLat([project.Longitude, project.Latitude])
-          .setPopup(new mapboxgl.Popup().setHTML(`<h3>${project.Title}</h3><p>${project.Description}</p>`))
-          .addTo(map.current);
-      }
+    // Wait for the map to load before adding markers
+    map.current.on('load', () => {
+      addMarkersToMap();
     });
-  }, [projectArray, lng, lat, zoom]);
+  }, []); // Empty dependency array, this effect runs once on mount
+
+  useEffect(() => {
+    if (map.current && map.current.loaded()) {
+      addMarkersToMap();
+    }
+  }, [projectArray]); // This effect runs when projectArray changes
+
+  const addMarkersToMap = () => {
+    // Remove existing markers
+    if (map.current.getLayer('markers')) {
+      map.current.removeLayer('markers');
+    }
+    if (map.current.getSource('markers')) {
+      map.current.removeSource('markers');
+    }
+
+    // Add new markers
+    const features = projectArray
+      .filter(project => project.long && project.lat && 
+               !isNaN(parseFloat(project.long)) && !isNaN(parseFloat(project.lat)))
+      .map(project => ({
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [parseFloat(project.long), parseFloat(project.lat)]
+        },
+        properties: {
+          title: project.Title,
+          description: project.Description
+        }
+      }));
+
+    if (features.length > 0) {
+      map.current.addSource('markers', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: features
+        }
+      });
+
+      map.current.addLayer({
+        id: 'markers',
+        type: 'circle',
+        source: 'markers',
+        paint: {
+          'circle-radius': 15,
+          'circle-color': '#B42222'
+        }
+      });
+
+      // Add popups
+      // map.current.on('click', 'markers', (e) => {
+      //   const coordinates = e.features[0].geometry.coordinates.slice();
+      //   const { title, description } = e.features[0].properties;
+
+      //   new mapboxgl.Popup()
+      //     .setLngLat(coordinates)
+      //     .setHTML(`<h3>${title}</h3><p>${description}</p>`)
+      //     .addTo(map.current);
+      // });
+
+      // Change cursor to pointer when hovering over a marker
+      map.current.on('mouseenter', 'markers', () => {
+        map.current.getCanvas().style.cursor = 'pointer';
+      });
+      map.current.on('mouseleave', 'markers', () => {
+        map.current.getCanvas().style.cursor = '';
+      });
+    }
+  };
 
   return (
     <div className="bg-[#FFFAF1] overflow-x-hidden text-black h-[100%] pb-[20px] w-[100%] absolute mt-[10vh] top-0">
@@ -179,9 +243,9 @@ export default function Home() {
         <h3 className ={'text-white text-[20px] font-medium max-md:text-[16px] max-md:text-center'} >Your one stop shop for improving your community</h3>
       </div>
       <div className="w-full bg-[#94DBFF] py-8">
-            <div ref={mapContainer} className="map-container mx-auto rounded-lg shadow-lg" style={{ height: '500px', width: '80%', maxWidth: '1200px' }} />
-          </div>
-          <div className = {'bg-[#FFFAF1] flex flex-row items-center py-4 justify-evenly'}>
+        <div ref={mapContainer} className="map-container mx-auto rounded-lg shadow-lg" style={{ height: '550px', width: '80%', maxWidth: '1200px' }} />
+      </div>
+      <div className = {'bg-[#FFFAF1] flex flex-row items-center py-10 justify-evenly'}>
         <Select
         closeMenuOnSelect={false}
         options={statusOptions}
