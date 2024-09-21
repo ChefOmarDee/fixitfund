@@ -11,6 +11,7 @@ export default function Home() {
       Description: "Omars house",
       ProjectId: "1",
       UId: "01",
+      Class: "Repair",
       Cost: "10000",
       Donated: "100",
       Status: "Open",
@@ -53,6 +54,7 @@ export default function Home() {
       </div>
       <div className = {'bg-[#FFFAF1] '}>
         <h1 className='text-center font-bold text-[40px]'>Home</h1>
+        
       </div>
       {loading &&
         <div className={'h-[100%] w-[100%] text-[100px] bg-[#FFFAF1] flex text-center justify-center align-center'}>
