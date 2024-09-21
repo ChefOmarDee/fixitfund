@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ProgressBar from '@ramonak/react-progress-bar';
 import { auth } from '../../_lib/firebase';
@@ -28,6 +28,7 @@ export default function Home() {
   const router = useRouter();
   const user = auth.currentUser;
 	const isNotLoggedIn = user === null;
+  const token =  typeof window !== "undefined" ? localStorage.getItem("Token") : null;;
 
   const statusOptions = [
     { value: 'Open', label: 'Open'},
@@ -79,8 +80,8 @@ export default function Home() {
     }
   }
 
-  const handleStatusChange = (e) => {
-    setStatus(e.target.value);
+  const handleStatusChange = (selectedOption) => {
+    setStatus(selectedOption.value);
 
     if(setStatus === 'Any'){
       return fetchProjects;
@@ -90,8 +91,8 @@ export default function Home() {
     }
   }
 
-  const handleClassChange = (e) => {
-    setClass(e.target.value);
+  const handleClassChange = (selectedOption) => {
+    setClass(selectedOptions.value);
 
     if(setClass === 'Any'){
       return fetchProjects;
@@ -103,15 +104,18 @@ export default function Home() {
 
   const CheckUser = async () => {
     try {
-      const response = await fetch("/getUser", {
+      const userId = auth.currentUser.uid;
+      const response = await fetch(`/api/getuserclass?userID=${userId}`, {
         method: "GET",
         headers: {
           'Authorization': `Bearer ${token}`
         },
       });
+      console.log(response);
       const data = await response.json();
-      if(data.Class === undefined){
-        router.push("newuserwelcome");
+      console.log(data)
+      if(data.class === undefined){
+        router.push("/newuserwelcome");
       }
     } catch (error) {
       console.error('Error fetching projects:', error);
@@ -138,23 +142,25 @@ export default function Home() {
     <div className="bg-[#FFFAF1] text-black h-[100%] w-[100%] absolute mt-[10vh] top-0">
       <div className={"flex bg-[url('../homeBg.jpg')] bg-cover bg-no-repeat justify-center items-center flex-col h-[50vh]"}>
         <h1 className={'text-white text-[60px] font-bold'}>Fix-It-Fund</h1> 
-        <h3 className ={'text-white text-[20px] font-medium'} >Your one stop shop for improving your community</h3>
+        <h3 className ={'text-white text-[20px] font-medium max-md:text-[16px] max-md:text-center'} >Your one stop shop for improving your community</h3>
       </div>
       <div className = {'bg-[#FFFAF1] flex flex-row items-center py-4 justify-evenly'}>
         <Select
         closeMenuOnSelect={false}
         options={statusOptions}
+        instanceId={useId}
         onChange={handleStatusChange}
-        className={'w-[15vw]'}
-        placeholder="Select a status to filter search"
+        className={'w-[15vw] max-md:w-[30vw]'}
+        placeholder="Status Filter"
         />
         <h1 className='text-center font-bold text-[40px]'>Home</h1>
         <Select
         closeMenuOnSelect={false}
+        instanceId={useId}
         onChange={handleClassChange}
-        className='w-[15vw]'
+        className='w-[15vw] max-md:w-[30vw]'
         options={classOptions}
-        placeholder="Select a class to filter search"
+        placeholder="Class Filter"
         />
       </div>
       {loading &&

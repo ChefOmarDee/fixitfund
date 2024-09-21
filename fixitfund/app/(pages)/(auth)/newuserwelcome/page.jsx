@@ -4,13 +4,19 @@ import { LogIn, CircleUser, UserPen} from 'lucide-react';
 import { toast, ToastContainer } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import 'react-toastify/dist/ReactToastify.css';
+import { auth } from '../../../_lib/firebase';
 
 const NewUserWelcome = () => {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [accountType, setType] = useState('');
-    const router = useRouter;
+    const router = useRouter();
     const [token, setToken] = useState('');
+    if(!auth.currentUser){
+        return router.push("/");
+    }
+    const userId = auth.currentUser.uid;
+    const userEmail = auth.currentUser.email;
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -35,12 +41,14 @@ const NewUserWelcome = () => {
 
         try {
             const data = {
-                Class: accountType,
-                FName: firstName,
-                LName: lastName
+                uid: userId,
+                email: userEmail,
+                firstName: firstName,
+                lastName: lastName,
+                userClass: accountType
             }
-            const response = await fetch("/postUserInformation", {
-              method: "Patch",
+            const response = await fetch("/api/createuser", {
+              method: "Post",
               headers: {
                 'Authorization': `Bearer ${token}`
               },
