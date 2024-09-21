@@ -1,9 +1,12 @@
 "use client"
 import { useEffect, useId, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
+import { onAuthStateChanged } from 'firebase/auth';
 import ProgressBar from '@ramonak/react-progress-bar';
 import { auth } from '../../_lib/firebase';
-import Select from 'react-select';
+const Select = dynamic(() => import('react-select'), { ssr: false });
+
 
 export default function Home() {
   const testingData = [
@@ -26,9 +29,8 @@ export default function Home() {
   let [statusInput, setStatus] = useState('');
   let [classInput, setClass] = useState('');
   const router = useRouter();
-  const user = auth.currentUser;
-	const isNotLoggedIn = user === null;
-  const token =  typeof window !== "undefined" ? localStorage.getItem("Token") : null;;
+	const [isNotLoggedIn, setNotLoggedIn] = useState();
+  const token =  typeof window !== "undefined" ? localStorage.getItem("Token") : null;
 
   const statusOptions = [
     { value: 'Open', label: 'Open'},
@@ -92,7 +94,7 @@ export default function Home() {
   }
 
   const handleClassChange = (selectedOption) => {
-    setClass(selectedOptions.value);
+    setClass(selectedOption.value);
 
     if(setClass === 'Any'){
       return fetchProjects;
@@ -113,8 +115,8 @@ export default function Home() {
       });
       console.log(response);
       const data = await response.json();
-      console.log(data)
-      if(data.class === undefined){
+      console.log("CheckUser", data);
+      if(data.status === undefined){
         router.push("/newuserwelcome");
       }
     } catch (error) {
@@ -133,10 +135,23 @@ export default function Home() {
   }, [fetchProjects]);
 
   useEffect(() => {
-    if(!isNotLoggedIn){
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (!currentUser){
+        setNotLoggedIn(true);
+      }
+      else{
+        setNotLoggedIn(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!isNotLoggedIn){
       CheckUser();
     }
-  }, [isNotLoggedIn, CheckUser]);
+  })
 
   return (
     <div className="bg-[#FFFAF1] text-black h-[100%] w-[100%] absolute mt-[10vh] top-0">
@@ -148,7 +163,7 @@ export default function Home() {
         <Select
         closeMenuOnSelect={false}
         options={statusOptions}
-        instanceId={useId}
+        instanceId={useId()}
         onChange={handleStatusChange}
         className={'w-[15vw] max-md:w-[30vw]'}
         placeholder="Status Filter"
@@ -156,7 +171,7 @@ export default function Home() {
         <h1 className='text-center font-bold text-[40px]'>Home</h1>
         <Select
         closeMenuOnSelect={false}
-        instanceId={useId}
+        instanceId={useId()}
         onChange={handleClassChange}
         className='w-[15vw] max-md:w-[30vw]'
         options={classOptions}
