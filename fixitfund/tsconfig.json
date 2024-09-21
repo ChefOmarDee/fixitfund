@@ -27,7 +27,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-, "app/(pages)/(main)/page.jsx"  ],
+, "app/(pages)/(main)/page.jsx", "app/api/filterprojects/[Status]/route.ts"  ],
   "exclude": [
     "node_modules"
   ]

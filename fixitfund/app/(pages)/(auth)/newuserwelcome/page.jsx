@@ -1,16 +1,23 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useId } from 'react';
 import { LogIn, CircleUser, UserPen} from 'lucide-react';
 import { toast, ToastContainer } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import 'react-toastify/dist/ReactToastify.css';
+import { auth } from '../../../_lib/firebase';
+import Select from 'react-select';
 
 const NewUserWelcome = () => {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [accountType, setType] = useState('');
-    const router = useRouter;
+    const router = useRouter();
     const [token, setToken] = useState('');
+    if(!auth.currentUser){
+        return router.push("/");
+    }
+    const userId = auth.currentUser.uid;
+    const userEmail = auth.currentUser.email;
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -19,30 +26,42 @@ const NewUserWelcome = () => {
         }
     }, []);
 
-    const handleSelectChange = (e) => {
-        setType(e.target.value);
+    const classOptions = [
+        { value: 'civ', label: 'Civilian'},
+        { value: 'wor', label: 'Contractor'},
+        { value: 'und', label: 'Undecided'},
+    ]
+
+    const handleSelectChange = (selectedOption) => {
+        setType(selectedOption.value);
         console.log(accountType)
       };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if(name.trim() === "" || accountType.trim() === ""){
-            setName("");    
+        if(firstName.trim() === "" || lastName.trim() === "" || accountType.trim() === ""){
+            console.log(firstName, lastName, accountType)
+            setFirstName("");    
+            setLastName("");
             setType("");
+
             return toast.error("Please do not leave inputs blank !");
         }
 
         try {
             const data = {
-                Class: accountType,
-                FName: firstName,
-                LName: lastName
+                uid: userId,
+                email: userEmail,
+                firstName: firstName,
+                lastName: lastName,
+                userClass: accountType
             }
-            const response = await fetch("/postUserInformation", {
-              method: "Patch",
+            const response = await fetch("/api/createuser", {
+              method: "POST",
               headers: {
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
               },
               body: JSON.stringify(data)
             });
@@ -71,7 +90,7 @@ const NewUserWelcome = () => {
               id="firstName"
               type="text"
               required
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
+              className="w-full p-3 border border-gray-300 text-black rounded-md focus:ring-purple-500 focus:border-purple-500"
               placeholder="John"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
@@ -86,7 +105,7 @@ const NewUserWelcome = () => {
               id="lastName"
               type="text"
               required
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
+              className="w-full p-3 border border-gray-300 text-black rounded-md focus:ring-purple-500 focus:border-purple-500"
               placeholder="Doe"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
@@ -97,18 +116,16 @@ const NewUserWelcome = () => {
               <UserPen className="inline-block w-5 h-5 mr-2" />
               Account Type
             </label>
-            <select
+            <Select
               id="accountType"
-              required
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
+              className="w-full p-3 border border-gray-300 text-black rounded-md focus:ring-purple-500 focus:border-purple-500"
               placeholder="Select Account Type"
+              instanceId={useId()}
+                options={classOptions}
+                closeMenuOnSelect={true}
               value={accountType}
               onChange={(e) => handleSelectChange(e)}
-            >
-                <option value="Civilian">Civilian</option>
-                <option value="Contractor">Contractor</option>
-                <option value="Undecided">Undecided</option>
-            </select>
+            />
           </div>
           <button
             type="submit"

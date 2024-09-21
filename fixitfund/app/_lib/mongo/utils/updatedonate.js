@@ -22,7 +22,7 @@ export async function updatedonated(projectId, donationAmount) {
 
         // Calculate the new donated amount
         let new_donated = donated + donationAmount;
-
+        let goalmet = false;
         if (new_donated >= cost) {
             // If donation exceeds the cost, cap it to the remaining amount
             const remaining = cost - donated;
@@ -34,6 +34,7 @@ export async function updatedonated(projectId, donationAmount) {
                 { projectId: projectId },
                 { status: "closed" }
             );
+            goalmet = true;
 
             if (update_status_result.matchedCount > 0) {
                 console.log("Project status updated to closed");
@@ -54,7 +55,7 @@ export async function updatedonated(projectId, donationAmount) {
             return { status: 400, data: { message: 'Donation update failed' } };
         }
 
-        return { status: 200, data: { message: 'Donation successfully added to project' } };
+        return { status: 200, data: { message: 'Donation successfully added to project', goalm: goalmet } };
     } catch (error) {
         console.error("Error in updatedonated:", error);
         return { status: 500, data: { error: 'Internal server error' } };

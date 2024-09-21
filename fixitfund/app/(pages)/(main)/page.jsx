@@ -1,8 +1,12 @@
 "use client"
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
+import { onAuthStateChanged } from 'firebase/auth';
 import ProgressBar from '@ramonak/react-progress-bar';
 import { auth } from '../../_lib/firebase';
+const Select = dynamic(() => import('react-select'), { ssr: false });
+
 
 export default function Home() {
   const testingData = [
@@ -21,22 +25,32 @@ export default function Home() {
     } 
   ]
   let [projectArray, setProjects] = useState([]);
-  let [loading, setLoading] = useState(false);
+  let [loading, setLoading] = useState(true);
+  let [statusInput, setStatus] = useState('');
   const router = useRouter();
-  const user = auth.currentUser;
-	const isNotLoggedIn = user === null;
+  const hasMounted = useRef(false);
+	const [isNotLoggedIn, setNotLoggedIn] = useState();
+  const token =  typeof window !== "undefined" ? localStorage.getItem("Token") : null;
+
+  const statusOptions = [
+    { value: 'Open', label: 'Open'},
+    { value: 'In-Progress', label: 'In Progress'},
+    { value: 'Closed', label: 'Closed'},
+    { value: 'Any', label: 'Any'}
+  ]
 
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/getProjects", {
+      const response = await fetch("/api/getallprojectdetails", {
         method: "GET",
         headers: {
           'Authorization': `Bearer ${token}`
         },
       });
       const data = await response.json();
-      setProjects(data);
+      console.log(data.data)
+      setProjects(data.data);
     } catch (error) {
       console.error('Error fetching projects:', error);
     } finally {
@@ -44,17 +58,36 @@ export default function Home() {
     }
   };
 
-  const CheckUser = async () => {
+  const fetchProjectsWithQuery = async() => {
+    setLoading(true);
     try {
-      const response = await fetch("/getUser", {
+      const response = await fetch(`/api/filterprojects/:Status=${statusInput}`, {
         method: "GET",
         headers: {
           'Authorization': `Bearer ${token}`
         },
       });
       const data = await response.json();
-      if(data.Class === undefined){
-        router.push("newuserwelcome");
+      setProjects(data.data);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const CheckUser = async () => {
+    try {
+      const userId = auth.currentUser.uid;
+      const response = await fetch(`/api/getuserclass?userID=${userId}`, {
+        method: "GET",
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+      });
+      const data = await response.json();
+      if(data.status === undefined){
+        router.push("/newuserwelcome");
       }
     } catch (error) {
       console.error('Error fetching projects:', error);
@@ -68,27 +101,56 @@ export default function Home() {
   }
   
   useEffect(() => {
-    //fetchProjects();
-  }, [fetchProjects]);
+    fetchProjects();
+  }, []);
 
   useEffect(() => {
-    if(!isNotLoggedIn){
+    if (hasMounted.current) {
+      // Call your function only after the component has mounted and `statusInput` changes
+      fetchProjectsWithQuery();
+    } else {
+      hasMounted.current = true; // Set to true after the first render
+    }
+  }, [statusInput]);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (!currentUser){
+        setNotLoggedIn(true);
+      }
+      else{
+        setNotLoggedIn(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!isNotLoggedIn){
       CheckUser();
     }
-  }, [isNotLoggedIn, CheckUser]);
+  })
 
   return (
-    <div className="bg-[#FFFAF1] text-black h-[100%] w-[100%] absolute mt-[10vh] top-0">
+    <div className="bg-[#FFFAF1] overflow-x-hidden text-black h-[100%] w-[100%] absolute mt-[10vh] top-0">
       <div className={"flex bg-[url('../homeBg.jpg')] bg-cover bg-no-repeat justify-center items-center flex-col h-[50vh]"}>
         <h1 className={'text-white text-[60px] font-bold'}>Fix-It-Fund</h1> 
-        <h3 className ={'text-white text-[20px] font-medium'} >Your one stop shop for improving your community</h3>
+        <h3 className ={'text-white text-[20px] font-medium max-md:text-[16px] max-md:text-center'} >Your one stop shop for improving your community</h3>
       </div>
-      <div className = {'bg-[#FFFAF1] '}>
+      <div className = {'bg-[#FFFAF1] flex flex-row items-center py-4 justify-evenly'}>
+        <Select
+        closeMenuOnSelect={false}
+        options={statusOptions}
+        instanceId={useId()}
+        onChange={(e) => setStatus(e.value)}
+        className={'w-[15vw] max-md:w-[25vw]'}
+        placeholder="Status Filter"
+        />
         <h1 className='text-center font-bold text-[40px]'>Home</h1>
-        
       </div>
       {loading &&
-        <div className={'h-[100%] w-[100%] text-[100px] bg-[#FFFAF1] flex text-center justify-center align-center'}>
+        <div className={'h-[100%] w-[100%] text-[100px] overflow-x-hidden max-md:text-[50px] bg-[#FFFAF1] flex text-center justify-center align-center'}>
           <h1 className="mt-[10vh] font-bold">loading...</h1>
         </div>
       }
@@ -97,14 +159,14 @@ export default function Home() {
           {projectArray.length !== 0 &&  projectArray.map((project) => (
           <div key={project.ProjectId} onClick={() => redirectToProject(project.ProjectId)} className="w-[25vw] rounded-xl mx-auto h-[40vh] hover:bg-gray-300 transition-colors duration-300 max-md:w-[85vw] max-md:h-[45vh] mt-[2vh] overflow-hidden bg-gray-200">
             <img 
-              src={project.PictureUrl} 
+              src={project.pictureUrl} 
               alt={project.Title} 
               className="w-full h-[75%] object-cover" 
             />
             <h3 className="text-black font-bold text-xl ml-[10px]">{project.Title}</h3>
             <h4 className="font-medium text-black text-md ml-[10px]">{project.Description}</h4>
-            <ProgressBar bgColor='green' width={'90%'} margin='0 0 0 10px' completed={(parseInt(project.Donated)/parseInt(project.Cost)) * 100} customLabelStyles={{ paddingLeft: '10px'}}/>
-            <h4 className="text-sm text-black font-light ml-[10px]">Amount Donated: {(parseInt(project.Donated)/parseInt(project.Cost)) * 100}%</h4>
+            <ProgressBar bgColor='green' width={'90%'} margin='0 0 0 10px' completed={Number(project.donated) === 0 || Number(project.cost) === 0 ? 0 : (Number(project.donated)/Number(project.cost)) * 100} customLabelStyles={{ paddingLeft: '10px'}}/>
+            <h4 className="text-sm text-black font-light ml-[10px]">Amount Donated: {Number(project.donated) === 0 || Number(project.cost) === 0 ? 0 :(Number(project.donated)/Number(project.cost)) * 100}%</h4>
           </div>
         ))}
       </div>
