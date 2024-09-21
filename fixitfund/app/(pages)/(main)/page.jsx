@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ProgressBar from '@ramonak/react-progress-bar';
+import { auth } from '../../_lib/firebase';
 
 export default function Home() {
   const testingData = [
@@ -22,12 +23,17 @@ export default function Home() {
   let [projectArray, setProjects] = useState([]);
   let [loading, setLoading] = useState(false);
   const router = useRouter();
+  const user = auth.currentUser;
+	const isNotLoggedIn = user === null;
 
   const fetchProjects = async () => {
     setLoading(true);
     try {
       const response = await fetch("/getProjects", {
         method: "GET",
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
       });
       const data = await response.json();
       setProjects(data);
@@ -38,13 +44,38 @@ export default function Home() {
     }
   };
 
+  const CheckUser = async () => {
+    try {
+      const response = await fetch("/getUser", {
+        method: "GET",
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+      });
+      const data = await response.json();
+      if(data.Class === undefined){
+        router.push("newuserwelcome");
+      }
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const redirectToProject = (projectId) => {
     router.push(`/project/${projectId}`);
   }
   
   useEffect(() => {
     //fetchProjects();
-  }, [fetchProjects])
+  }, [fetchProjects]);
+
+  useEffect(() => {
+    if(!isNotLoggedIn){
+      CheckUser();
+    }
+  }, [isNotLoggedIn, CheckUser]);
 
   return (
     <div className="bg-[#FFFAF1] text-black h-[100%] w-[100%] absolute mt-[10vh] top-0">

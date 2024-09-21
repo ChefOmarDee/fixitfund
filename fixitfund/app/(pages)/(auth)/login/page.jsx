@@ -35,7 +35,7 @@ const Login = () => {
             position: toast.POSITION.TOP_RIGHT,
           });
         setTimeout(() => {
-            router.push(`/newuserwelcome`);
+            router.push(`/`);
           }, 1000);
       })
       .catch((error) => {
@@ -62,7 +62,7 @@ const Login = () => {
             position: toast.POSITION.TOP_RIGHT,
           });
           setTimeout(() => {
-            router.push("/newuserwelcome");
+            router.push("/");
           }, 1000);
     }).catch((error) =>{
         return toast.error(error.message, {
