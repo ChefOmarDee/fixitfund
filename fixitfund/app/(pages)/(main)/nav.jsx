@@ -54,15 +54,16 @@ const Navbar = ({children}) => {
 	};
 
 	return (
-	  <nav className={`sticky top-0 w-full ${navbarHeight} bg-[#f17418] z-50 transition-all duration-300`}>
+	  <nav className={`sticky top-0 w-full h-[10vh] ${navbarHeight} bg-[#f17418] z-50 transition-all duration-300`}>
 		<div className="w-full h-full flex justify-between items-center px-4 sm:px-6 md:px-6">
 			<div className="justify-between flex space-x-8 items-center">
 				<Link href='/'>
 					<Image
 						src={Logo}
 						alt="Logo"
-						width={65}
+						width={50}
 						height={50}
+						style={{ borderRadius: '50%'}}
 						className="cursor-pointer"
 						priority
 					/>
