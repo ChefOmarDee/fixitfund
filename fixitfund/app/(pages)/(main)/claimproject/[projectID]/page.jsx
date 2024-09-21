@@ -1,25 +1,24 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import { DollarSign, FileText, MapPin, Tag, User } from 'lucide-react';
-import { auth } from '../../../../_lib/firebase'; // Import Firebase auth
-import { onAuthStateChanged } from 'firebase/auth'; // Listen for auth state
+import { auth } from '../../../../_lib/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const ClaimProject = ({ params }) => {
   const [donationAmount, setDonationAmount] = useState('');
-  const [projectDetails, setProjectDetails] = useState(null); 
+  const [projectDetails, setProjectDetails] = useState(null);
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [userUID, setUserUID] = useState(null); // New state for storing UID
+  const [userUID, setUserUID] = useState(null);
 
   useEffect(() => {
-    // Fetch project details when the component mounts
     const fetchProjectDetails = async () => {
       try {
-        const response = await fetch(`/api/getallprojectdetails?projectID=${params.projectID}`);
+        const response = await fetch(`/api/getprojectdetails?projectID=${params.projectID}`);
         const data = await response.json();
 
         if (response.ok) {
-          setProjectDetails(data);
+          setProjectDetails(data.projectDetails);
         } else {
           throw new Error(data.error || 'Failed to fetch project details');
         }
@@ -30,10 +29,9 @@ const ClaimProject = ({ params }) => {
 
     fetchProjectDetails();
 
-    // Fetch UID of logged-in user
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
-        setUserUID(currentUser.uid); // Set the UID when user is logged in
+        setUserUID(currentUser.uid);
       } else {
         setMessage("No user logged in");
       }
@@ -56,7 +54,7 @@ const ClaimProject = ({ params }) => {
         body: JSON.stringify({
           projectId: params.projectID,
           donationAmount: parseFloat(donationAmount),
-          userUID, // Include the UID in the request body
+          userUID,
         }),
       });
 
@@ -64,7 +62,7 @@ const ClaimProject = ({ params }) => {
 
       if (response.ok) {
         setMessage('Project claimed successfully!');
-        console.log('Donation amount needed:', donationAmount, 'Project ID:', params.projectID);
+        console.log('Donation amount:', donationAmount, 'Project ID:', params.projectID);
       } else {
         throw new Error(data.error || 'Failed to claim project');
       }
@@ -75,6 +73,8 @@ const ClaimProject = ({ params }) => {
     }
   };
 
+  const isProjectClaimable = projectDetails && projectDetails.Status === 'open';
+
   return (
     <div className="min-h-screen bg-[#FFFAF1] flex items-center justify-center">
       <div className="bg-white shadow-lg rounded-lg max-w-2xl w-full p-8">
@@ -82,6 +82,11 @@ const ClaimProject = ({ params }) => {
         
         {projectDetails ? (
           <div className="mb-6 p-4 bg-gray-100 rounded-md">
+            <img 
+              src={projectDetails.PictureURL} 
+              alt={projectDetails.Title} 
+              className="w-full h-auto rounded-md mb-4" 
+            />
             <h2 className="text-xl font-semibold mb-2 text-orange-500">Project Details</h2>
             <p className="flex items-center mb-2">
               <FileText className="inline-block w-5 h-5 mr-2 text-gray-600" />
@@ -99,14 +104,12 @@ const ClaimProject = ({ params }) => {
               <Tag className="inline-block w-5 h-5 mr-2 text-gray-600" />
               <span className="font-medium">Tag:</span> {projectDetails.Tag || 'No tag'}
             </p>
-            <p className="flex items-center">
-              <User className="inline-block w-5 h-5 mr-2 text-gray-600" />
-              <span className="font-medium">Created by:</span> {projectDetails.UID || 'Unknown'}
-            </p>
+            
+            
 
             {projectDetails.Status !== 'open' && (
-              <p className="text-red-600 font-bold mt-4">
-                This project has already been taken.
+              <p className="text-red-500 font-medium mt-2">
+                This project has already been taken or is not available for claiming.
               </p>
             )}
           </div>
@@ -118,7 +121,7 @@ const ClaimProject = ({ params }) => {
           <div>
             <label htmlFor="donationAmount" className="block mb-2 font-medium text-gray-700">
               <DollarSign className="inline-block w-5 h-5 mr-2 text-orange-500" />
-              Donation Amount Needed
+              Donation Amount
             </label>
             <input
               id="donationAmount"
@@ -130,15 +133,15 @@ const ClaimProject = ({ params }) => {
               onChange={(e) => setDonationAmount(e.target.value)}
             />
           </div>
-          
+
           <button
             type="submit"
-            disabled={isLoading || projectDetails?.Status !== 'open'}
-            className={`w-full px-6 py-3 rounded-md text-lg font-semibold transition duration-300 ${
-              projectDetails?.Status !== 'open' 
-              ? 'bg-gray-400 cursor-not-allowed text-white' 
-              : 'bg-[#019ca0] text-white hover:bg-[#49bfc3]'
-            }`}
+            disabled={!isProjectClaimable || isLoading}
+            className={`w-full ${
+              isProjectClaimable
+                ? 'bg-[#019ca0] text-white hover:bg-[#49bfc3]'
+                : 'bg-gray-400 text-white cursor-not-allowed'
+            } px-6 py-3 rounded-md text-lg font-semibold transition duration-300`}
           >
             {isLoading ? 'Processing...' : 'Claim Project'}
           </button>
