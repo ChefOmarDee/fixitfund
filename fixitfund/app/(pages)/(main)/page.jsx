@@ -33,9 +33,9 @@ export default function Home() {
   const token =  typeof window !== "undefined" ? localStorage.getItem("Token") : null;
 
   const statusOptions = [
-    { value: 'Open', label: 'Open'},
-    { value: 'In-Progress', label: 'In Progress'},
-    { value: 'Closed', label: 'Closed'},
+    { value: 'open', label: 'Open'},
+    { value: 'in progress', label: 'In Progress'},
+    { value: 'closed', label: 'Closed'},
     { value: 'Any', label: 'Any'}
   ]
 
@@ -65,13 +65,14 @@ export default function Home() {
       return;
     }
     try {
-      const response = await fetch(`/api/filterprojects/:Status=${statusInput}`, {
+      const response = await fetch(`/api/filterprojects/${statusInput}`, {
         method: "GET",
         headers: {
           'Authorization': `Bearer ${token}`
         },
       });
       const data = await response.json();
+      console.log(data)
       setProjects(data.data);
     } catch (error) {
       console.error('Error fetching projects:', error);
