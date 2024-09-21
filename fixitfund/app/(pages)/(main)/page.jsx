@@ -101,7 +101,8 @@ export default function Home() {
         },
       });
       const data = await response.json();
-      if(data.status === undefined){
+      console.log("data", data)
+      if(data.status === null){
         router.push("/newuserwelcome");
       }
     } catch (error) {
@@ -143,6 +144,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!isNotLoggedIn){
+      console.log("hi")
       CheckUser();
     }
   })
