@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -27,22 +27,15 @@ export default function Home() {
   let [projectArray, setProjects] = useState([]);
   let [loading, setLoading] = useState(true);
   let [statusInput, setStatus] = useState('');
-  let [classInput, setClass] = useState('');
   const router = useRouter();
+  const hasMounted = useRef(false);
 	const [isNotLoggedIn, setNotLoggedIn] = useState();
   const token =  typeof window !== "undefined" ? localStorage.getItem("Token") : null;
 
   const statusOptions = [
     { value: 'Open', label: 'Open'},
-    { value: 'In Progress', label: 'In Progress'},
+    { value: 'In-Progress', label: 'In Progress'},
     { value: 'Closed', label: 'Closed'},
-    { value: 'Any', label: 'Any'}
-  ]
-
-  const classOptions = [
-    { value: 'Repair', label: 'Repair'},
-    { value: 'Environmental', label: 'Environmental'},
-    { value: 'Addition', label: 'Addition'},
     { value: 'Any', label: 'Any'}
   ]
 
@@ -56,6 +49,7 @@ export default function Home() {
         },
       });
       const data = await response.json();
+      console.log(data.data)
       setProjects(data.data);
     } catch (error) {
       console.error('Error fetching projects:', error);
@@ -67,40 +61,18 @@ export default function Home() {
   const fetchProjectsWithQuery = async() => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/getProjects?Status=${statusInput}&Class=${classInput}`, {
+      const response = await fetch(`/api/filterprojects/:Status=${statusInput}`, {
         method: "GET",
         headers: {
           'Authorization': `Bearer ${token}`
         },
       });
       const data = await response.json();
-      setProjects(data);
+      setProjects(data.data);
     } catch (error) {
       console.error('Error fetching projects:', error);
     } finally {
       setLoading(false);
-    }
-  }
-
-  const handleStatusChange = (selectedOption) => {
-    setStatus(selectedOption.value);
-
-    if(setStatus === 'Any'){
-      return fetchProjects;
-    }
-    else{
-      return fetchProjectsWithQuery();
-    }
-  }
-
-  const handleClassChange = (selectedOption) => {
-    setClass(selectedOption.value);
-
-    if(setClass === 'Any'){
-      return fetchProjects;
-    }
-    else{
-      return fetchProjectsWithQuery();
     }
   }
 
@@ -133,6 +105,15 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    if (hasMounted.current) {
+      // Call your function only after the component has mounted and `statusInput` changes
+      fetchProjectsWithQuery();
+    } else {
+      hasMounted.current = true; // Set to true after the first render
+    }
+  }, [statusInput]);
+
+  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (!currentUser){
         setNotLoggedIn(true);
@@ -162,19 +143,11 @@ export default function Home() {
         closeMenuOnSelect={false}
         options={statusOptions}
         instanceId={useId()}
-        onChange={handleStatusChange}
+        onChange={(e) => setStatus(e.value)}
         className={'w-[15vw] max-md:w-[25vw]'}
         placeholder="Status Filter"
         />
         <h1 className='text-center font-bold text-[40px]'>Home</h1>
-        <Select
-        closeMenuOnSelect={false}
-        instanceId={useId()}
-        onChange={handleClassChange}
-        className='w-[15vw] max-md:w-[25vw]'
-        options={classOptions}
-        placeholder="Class Filter"
-        />
       </div>
       {loading &&
         <div className={'h-[100%] w-[100%] text-[100px] overflow-x-hidden max-md:text-[50px] bg-[#FFFAF1] flex text-center justify-center align-center'}>
@@ -186,14 +159,14 @@ export default function Home() {
           {projectArray.length !== 0 &&  projectArray.map((project) => (
           <div key={project.ProjectId} onClick={() => redirectToProject(project.ProjectId)} className="w-[25vw] rounded-xl mx-auto h-[40vh] hover:bg-gray-300 transition-colors duration-300 max-md:w-[85vw] max-md:h-[45vh] mt-[2vh] overflow-hidden bg-gray-200">
             <img 
-              src={project.PictureUrl} 
+              src={project.pictureUrl} 
               alt={project.Title} 
               className="w-full h-[75%] object-cover" 
             />
             <h3 className="text-black font-bold text-xl ml-[10px]">{project.Title}</h3>
             <h4 className="font-medium text-black text-md ml-[10px]">{project.Description}</h4>
-            <ProgressBar bgColor='green' width={'90%'} margin='0 0 0 10px' completed={(parseInt(project.Donated)/parseInt(project.Cost)) * 100} customLabelStyles={{ paddingLeft: '10px'}}/>
-            <h4 className="text-sm text-black font-light ml-[10px]">Amount Donated: {(parseInt(project.Donated)/parseInt(project.Cost)) * 100}%</h4>
+            <ProgressBar bgColor='green' width={'90%'} margin='0 0 0 10px' completed={Number(project.donated) === 0 || Number(project.cost) === 0 ? 0 : (Number(project.donated)/Number(project.cost)) * 100} customLabelStyles={{ paddingLeft: '10px'}}/>
+            <h4 className="text-sm text-black font-light ml-[10px]">Amount Donated: {Number(project.donated) === 0 || Number(project.cost) === 0 ? 0 :(Number(project.donated)/Number(project.cost)) * 100}%</h4>
           </div>
         ))}
       </div>
