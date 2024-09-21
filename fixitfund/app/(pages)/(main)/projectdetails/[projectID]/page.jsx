@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function ProjectDetails({params}){
     const [data, setData] = useState(null);
@@ -12,52 +12,52 @@ export default function ProjectDetails({params}){
   const [cost,setCost] = useState(0);
   const [donated,setDonated] = useState(0);
   const [userClass, setUserClass] = useState("");
-  const [userID, setUserID] = ("");
+  const [userID, setUserID] = useState("");
     const projectId = params.projectID;
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(`/api/getallprojectdetails?projectID=${projectId}`); // Adjust your API route
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const result = await response.json();
-        setData(JSON.stringify(result));
-        console.log(result.Title);
-        setTitle(result.Title);
-        setDesc(result.Desc);
-        setPicUrl(result.PictureURL);
-        setStatus(result.Status);
-        setTag(result.Tag);
-        setCost(result.cost);
-        setDonated(result.Donated);
-        setUserID(result.UID);
-      } catch (error) {
-        setError(error.message);
+    useEffect(() => {
+        const fetchData = async () => {
+          try {
+            // First, fetch project details
+            const projectResponse = await fetch(`/api/getallprojectdetails?projectID=${projectId}`);
+            if (!projectResponse.ok) {
+              throw new Error('Network response was not ok for project details');
+            }
+            const projectResult = await projectResponse.json();
+            console.log(projectResult);
+            console.log(projectResult.UID);
+            setData(JSON.stringify(projectResult));
+            setTitle(projectResult.Title);
+            setDesc(projectResult.Desc);
+            setPicUrl(projectResult.PictureURL);
+            setStatus(projectResult.Status);
+            setTag(projectResult.Tag);
+            setCost(projectResult.cost);
+            setDonated(projectResult.Donated);
+            setUserID(projectResult.UID);
+      
+        const userResponse = await fetch(`/api/getuserclass?userID=${projectResult.UID}`);
+      if (!userResponse.ok) {
+        throw new Error('Network response was not ok for user status');
       }
-    };
-
-    fetchData();
-  }, []);
-  
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(`/api/getuserstatus?userID=${userID}`); // Adjust your API route
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const result = await response.json();
-        setUserClass(result.status);
-      } catch (error) {
-        setError(error.message);
-      }
-    };
-
-    fetchData();
-  }, []);
-
+            // Then, fetch user class using the UID from project details
+            const userResult = await  userResponse.json();
+            if (userResult.status !== undefined) {
+              setUserClass(userResult.status);
+              console.log("User class:", userResult.status);
+            } else {
+              console.log("User class not found");
+              setUserClass(null);
+            }
+      
+      
+          } catch (error) {
+            console.log(error);
+            setError(error.message);
+          }
+        };
+      
+        fetchData();
+      }, [projectId]); // Add projectId as a dependency if it's not constant
   const renderActionButton = () => {
     switch(status.toLowerCase()) {
         case 'open':
@@ -75,9 +75,11 @@ export default function ProjectDetails({params}){
             }
         case 'in progress':
             return (
+                <Link href={`/donate/${projectId}`} passHref>
                 <button className="w-full py-2 px-4 bg-[#f17418] hover:bg-[#d95f00] text-white font-bold rounded-lg transition duration-200">
                     Donate Now
                 </button>
+                </Link>
             );
         case 'closed':
             return null;
