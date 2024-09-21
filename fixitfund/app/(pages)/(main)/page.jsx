@@ -60,6 +60,7 @@ export default function Home() {
       const data = await response.json();
       console.log(data.data)
       setProjects(data.data);
+      console.log(data.data)
     } catch (error) {
       console.error('Error fetching projects:', error);
     } finally {
