@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 import 'react-toastify/dist/ReactToastify.css';
 
 const NewUserWelcome = () => {
-    const [name, setName] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [accountType, setType] = useState('');
     const router = useRouter;
     const [token, setToken] = useState('');
@@ -37,7 +38,8 @@ const NewUserWelcome = () => {
         try {
             const data = {
                 Class: accountType,
-                Name: name
+                FName: firstName,
+                LName: lastName
             }
             const response = await fetch("/postUserInformation", {
               method: "Post",
@@ -62,18 +64,33 @@ const NewUserWelcome = () => {
         <h1 className="text-3xl font-bold text-center text-black mb-6">Please Select To Continue</h1>
         <form className="space-y-6">
           <div>
-            <label htmlFor="email" className="block mb-2 font-medium text-gray-700">
+            <label htmlFor="firstName" className="block mb-2 font-medium text-gray-700">
               <CircleUser className="inline-block w-5 h-5 mr-2" />
-              Name
+              First Name
             </label>
             <input
-              id="name"
+              id="firstName"
               type="text"
               required
               className="w-full p-3 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
-              placeholder="example@gmail.com"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              placeholder="John"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="lastName" className="block mb-2 font-medium text-gray-700">
+              <CircleUser className="inline-block w-5 h-5 mr-2" />
+              Last Name
+            </label>
+            <input
+              id="lastName"
+              type="text"
+              required
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
+              placeholder="Doe"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
             />
           </div>
           <div>
