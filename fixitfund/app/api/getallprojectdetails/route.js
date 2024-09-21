@@ -13,7 +13,7 @@ export async function GET(req) {
         console.log("Fetching details for project ID:", projectID);
 
         const result = await getallprojectdetails(projectID);
-
+        console.log(result)
         if (result.status === 404) {
             return NextResponse.json(result.json, { status: 404 });
         }
