@@ -60,6 +60,10 @@ export default function Home() {
 
   const fetchProjectsWithQuery = async() => {
     setLoading(true);
+
+    if(statusInput === ""){
+      return;
+    }
     try {
       const response = await fetch(`/api/filterprojects/:Status=${statusInput}`, {
         method: "GET",
@@ -133,7 +137,7 @@ export default function Home() {
   })
 
   return (
-    <div className="bg-[#FFFAF1] overflow-x-hidden text-black h-[100%] w-[100%] absolute mt-[10vh] top-0">
+    <div className="bg-[#FFFAF1] overflow-x-hidden text-black h-[100%] pb-[20px] w-[100%] absolute mt-[10vh] top-0">
       <div className={"flex bg-[url('../homeBg.jpg')] bg-cover bg-no-repeat justify-center items-center flex-col h-[50vh]"}>
         <h1 className={'text-white text-[60px] font-bold'}>Fix-It-Fund</h1> 
         <h3 className ={'text-white text-[20px] font-medium max-md:text-[16px] max-md:text-center'} >Your one stop shop for improving your community</h3>
