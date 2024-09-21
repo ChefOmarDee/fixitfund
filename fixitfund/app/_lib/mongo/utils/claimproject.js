@@ -25,9 +25,9 @@ export async function ClaimProject(projectID, cost, wid) {
       throw new Error(`Project with ID ${projectID} is either not found or not open for claiming.`);
     }
 
-    return updatedProject; // Return the updated project
+    return { success: true, project: updatedProject }; // Return an object with success flag
   } catch (error) {
     console.error("Error in ClaimProject:", error);
-    throw error;
+    return { success: false, error: error.message }; // Return error info
   }
 }
