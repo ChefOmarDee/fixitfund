@@ -5,12 +5,17 @@ import Image from 'next/image';
 import Logo from './a.jpeg'; 
 import { useState, useEffect } from 'react';
 import { FaBars, FaTimes } from 'react-icons/fa';
-
+import { auth } from '../../_lib/firebase';
+import { usePathname } from 'next/navigation';
 
 const Navbar = ({children}) => {
 	const [isMobile, setIsMobile] = useState(false);
 	const [isOpen, setIsOpen] = useState(false); //used for HAMBURGER
 	const [navbarHeight, setNavbarHeight] = useState('h-24');
+	const pathname = usePathname();
+
+	const user = auth.currentUser;
+	const isNotLoggedIn = user === null;
 
     useEffect(() => {
         const handleResize = () => { // determines if mobile
@@ -49,7 +54,7 @@ const Navbar = ({children}) => {
 	};
 
 	return (
-	  <nav className={`sticky top-0 w-full ${navbarHeight} bg-[#02254D] z-50 transition-all duration-300`}>
+	  <nav className={`sticky top-0 w-full ${navbarHeight} bg-[#f17418] z-50 transition-all duration-300`}>
 		<div className="w-full h-full flex justify-between items-center px-4 sm:px-6 md:px-6">
 			<div className="justify-between flex space-x-8 items-center">
 				<Link href='/'>
@@ -64,34 +69,36 @@ const Navbar = ({children}) => {
 				</Link>
 				{!isMobile && (
 					<>
-					<Link href='/about'>
-						<div className="font-bold text-lg">About</div>
+					{!isNotLoggedIn && 
+					<Link href='/account'>
+						<div className={`font-bold text-lg ${pathname === '/account' ? 'underline decoration-white' : ''}`}>Account</div>
 					</Link>
-					<Link href='/pricing'>
-						<div className="font-bold text-lg">Pricing</div>
-					</Link>
-					<Link href='/contact'>
-						<div className="font-bold text-lg">Contact Us</div>
-					</Link>
-					<Link href='/howtouse'>
-						<div className="font-bold text-lg">How to Use</div>
+					}
+					<Link href='/'>
+						<div className={`font-bold text-lg ${pathname === '/' ? 'underline decoration-white' : ''}`}>Home</div>
 					</Link>
 					</>
 				)}
 			</div>
 			{!isMobile && (
 			<div className="justify-between flex space-x-6 items-center">
-				<Link href='/dashboard'>
-					<div className="font-bold text-lg">Sign up</div>
-				</Link>
-				<Link href='/dashboard'>
-					<div className="font-bold text-lg">Log in</div>
-				</Link>
-				<Link href='/dashboard'>
+				{isNotLoggedIn && 
+					<>
+						<Link href='/signin'>
+							<div className="font-bold text-lg">Sign up</div>
+						</Link>
+						<Link href='/signup'>
+							<div className="font-bold text-lg rounded-xl bg-[#019ca0] cursor-pointer hover:bg-[#49bfc3] px-3 py-2">Log in</div>
+						</Link>
+					</>
+				}
+				{ !isNotLoggedIn && 
+				<Link href='/create'>
 				<div className="font-bold text-lg bg-[#fff7db] text-black px-3 py-2 rounded-xl hover:bg-gray-400 cursor-pointer">
-					Get started
+					Create
 				</div>
 				</Link>
+				}
 			</div>
 			)}
 			{isMobile && (
@@ -107,31 +114,37 @@ const Navbar = ({children}) => {
 					onClick={toggleMenu}
 				></div>
 				)}
-				<div className={`fixed top-0 right-0 w-3/4 h-full bg-[#02254D] shadow-xl z-50 flex flex-col p-4 transform transition-all duration-300 ease-in-out ${ //panel opener
+				<div className={`fixed top-0 right-0 w-3/4 h-full bg-[#f17418] shadow-xl z-50 flex flex-col p-4 transform transition-all duration-300 ease-in-out ${ //panel opener
 					isOpen ? 'translate-x-0' : 'translate-x-full' //conditional, isOpen = true -> translates element 0, false -> translates it to right
 				}`}
 				>
 				<div className="flex justify-end">
 					<FaTimes onClick={toggleMenu} size={24} className="cursor-pointer" />
 				</div>
-				<Link href='/about' onClick={closeMenu}>
-					<div className="font-bold text-lg py-2">About</div>
+				<Link href='/account' onClick={closeMenu}>
+					<div className={`font-bold text-lg py-2 ${pathname === '/account' ? 'underline decoration-white' : ''}`}>Account</div>
 				</Link>
-				<Link href='/pricing' onClick={closeMenu}>
-					<div className="font-bold text-lg py-2">Pricing</div>
+				<Link href='/' onClick={closeMenu}>
+					<div className={`font-bold text-lg py-2 ${pathname === '/' ? 'underline decoration-white' : ''}`}>Home</div>
 				</Link>
-				<Link href='/contact' onClick={closeMenu}>
-					<div className="font-bold text-lg py-2">Contact Us</div>
-				</Link>
-				<Link href='/howtouse' onClick={closeMenu}>
-					<div className="font-bold text-lg py-2">How to Use</div>
-				</Link>
-				<Link href='/dashboard' onClick={closeMenu}>
+				{isNotLoggedIn && 
+				<>
+				<Link href='/signup' onClick={closeMenu}>
 					<div className="font-bold text-lg py-2">Sign Up</div>
 				</Link>
-				<Link href='/dashboard' onClick={closeMenu}>
-					<div className="font-bold text-lg py-2">Sign In</div>
+				<Link href='/signin' onClick={closeMenu}>
+					<div className="font-bold text-lg rounded-xl w-3/5 mt-[3vh] text-center bg-[#019ca0] cursor-pointer px-3 py-2">Sign In</div>
 				</Link>
+				</>
+				
+				}
+				{!isNotLoggedIn &&
+				<Link href='/create'>
+				<div className="font-bold text-lg bg-[#fff7db] w-3/5 mt-[3vh] text-white text-center py-2 rounded-xl hover:bg-gray-400 cursor-pointer">
+					Create
+				</div>
+				</Link>
+				}
 				</div>
 			</>
 			)}
