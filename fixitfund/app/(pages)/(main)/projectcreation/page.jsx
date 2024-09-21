@@ -1,9 +1,9 @@
 "use client"
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Camera, Tag, FileText, Type } from 'lucide-react';
-import { auth } from '../../../_lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
+import { Camera, FileText, Tag, Type } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { auth } from '../../../_lib/firebase';
 
 const UploadForm = () => {
   const [title, setTitle] = useState('');
@@ -93,7 +93,7 @@ const UploadForm = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="title" className="block mb-2 font-medium text-gray-700">
+            <label htmlFor="title" className="block mb-2 font-medium text-black">
               <FileText className="inline-block w-5 h-5 mr-2 text-orange-500" />
               Title
             </label>
@@ -101,7 +101,7 @@ const UploadForm = () => {
               id="title"
               type="text"
               required
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-3 border border-black rounded-md focus:ring-blue-500 focus:border-blue-500"
               placeholder="Enter project title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -124,7 +124,7 @@ const UploadForm = () => {
           </div>
 
           <div>
-            <label htmlFor="image" className="block mb-2 font-medium text-gray-700">
+            <label htmlFor="image" className="block mb-2 font-medium text-black">
               <Camera className="inline-block w-5 h-5 mr-2 text-orange-500" />
               Image
             </label>
@@ -139,7 +139,7 @@ const UploadForm = () => {
           </div>
 
           <div>
-            <label htmlFor="tag" className="block mb-2 font-medium text-gray-700">
+            <label htmlFor="tag" className="block mb-2 font-medium text-black">
               <Tag className="inline-block w-5 h-5 mr-2 text-orange-500" />
               Tag
             </label>

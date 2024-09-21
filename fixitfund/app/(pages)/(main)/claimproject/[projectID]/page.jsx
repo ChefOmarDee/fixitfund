@@ -76,7 +76,7 @@ const ClaimProject = ({ params }) => {
   const isProjectClaimable = projectDetails && projectDetails.Status === 'open';
 
   return (
-    <div className="min-h-screen bg-[#FFFAF1] flex items-center justify-center">
+    <div className="min-h-screen bg-[#FFFAF1] flex items-center justify-center text-black">
       <div className="bg-white shadow-lg rounded-lg max-w-2xl w-full p-8">
         <h1 className="text-3xl font-bold text-center mb-6 text-orange-500">Claim Project</h1>
         
@@ -89,19 +89,19 @@ const ClaimProject = ({ params }) => {
             />
             <h2 className="text-xl font-semibold mb-2 text-orange-500">Project Details</h2>
             <p className="flex items-center mb-2">
-              <FileText className="inline-block w-5 h-5 mr-2 text-gray-600" />
+              <FileText className="inline-block w-5 h-5 mr-2 text-black" />
               <span className="font-medium">Title:</span> {projectDetails.Title || 'No title'}
             </p>
             <p className="flex items-center mb-2">
-              <MapPin className="inline-block w-5 h-5 mr-2 text-gray-600" />
+              <MapPin className="inline-block w-5 h-5 mr-2 text-black" />
               <span className="font-medium">Latitude:</span> {projectDetails.Lat || 'No location'}
             </p>
-            <p className="flex items-center mb-2">
-              <MapPin className="inline-block w-5 h-5 mr-2 text-gray-600" />
+            <p className="flex items-center mb-2 text-black">
+              <MapPin className="inline-block w-5 h-5 mr-2 text-black" />
               <span className="font-medium">Longitude:</span> {projectDetails.Long || 'No location'}
             </p>
             <p className="flex items-center mb-2">
-              <Tag className="inline-block w-5 h-5 mr-2 text-gray-600" />
+              <Tag className="inline-block w-5 h-5 mr-2 text-black" />
               <span className="font-medium">Tag:</span> {projectDetails.Tag || 'No tag'}
             </p>
             
