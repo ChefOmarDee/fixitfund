@@ -16,13 +16,10 @@ export async function GET(req, res) {
         ProjectID: "proj-12345",
         UID: "user-67890",
         WID: "work-54321",
-        cost: {
-          estimated: 5000.00,
-          actual: 4500.00
-        },
+        cost: 4500.00,
         Donated: 2000.00,
-        Status: "in progress",
-        PictureURL: "https://example.com/images/park.jpg",
+        Status: "open",
+        PictureURL: "https://fixitfund.s3.amazonaws.com/pothole-pic.jpg",
         Tag: "environmental"
       };
       
