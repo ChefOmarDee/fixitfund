@@ -49,14 +49,14 @@ export default function Home() {
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/getProjects", {
+      const response = await fetch("/api/getallprojectdetails", {
         method: "GET",
         headers: {
           'Authorization': `Bearer ${token}`
         },
       });
       const data = await response.json();
-      setProjects(data);
+      setProjects(data.data);
     } catch (error) {
       console.error('Error fetching projects:', error);
     } finally {
@@ -129,8 +129,8 @@ export default function Home() {
   }
   
   useEffect(() => {
-    //fetchProjects();
-  }, [fetchProjects]);
+    fetchProjects();
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
