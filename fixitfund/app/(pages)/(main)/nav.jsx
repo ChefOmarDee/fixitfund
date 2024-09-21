@@ -94,7 +94,7 @@ const Navbar = ({children}) => {
 					</>
 				}
 				{ !isNotLoggedIn && 
-				<Link href='/create'>
+				<Link href='/projectcreation'>
 				<div className="font-bold text-lg bg-[#fff7db] text-black px-3 py-2 rounded-xl hover:bg-gray-400 cursor-pointer">
 					Create
 				</div>
