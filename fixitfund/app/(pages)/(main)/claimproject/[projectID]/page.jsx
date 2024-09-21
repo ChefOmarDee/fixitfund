@@ -88,6 +88,12 @@ const ClaimProject = ({ params }) => {
               <User className="inline-block w-5 h-5 mr-2 text-gray-600" />
               <span className="font-medium">Created by:</span> {projectDetails.UID || 'Unknown'}
             </p>
+
+            {projectDetails.Status !== 'open' && (
+              <p className="text-red-600 font-bold mt-4">
+                This project has already been taken.
+              </p>
+            )}
           </div>
         ) : (
           <p>Loading project details...</p>
@@ -112,8 +118,12 @@ const ClaimProject = ({ params }) => {
           
           <button
             type="submit"
-            disabled={isLoading}
-            className="w-full bg-[#019ca0] text-white px-6 py-3 rounded-md text-lg font-semibold hover:bg-[#49bfc3] transition duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            disabled={isLoading || projectDetails?.Status !== 'open'}
+            className={`w-full px-6 py-3 rounded-md text-lg font-semibold transition duration-300 ${
+              projectDetails?.Status !== 'open' 
+              ? 'bg-gray-400 cursor-not-allowed text-white' 
+              : 'bg-[#019ca0] text-white hover:bg-[#49bfc3]'
+            }`}
           >
             {isLoading ? 'Processing...' : 'Claim Project'}
           </button>
