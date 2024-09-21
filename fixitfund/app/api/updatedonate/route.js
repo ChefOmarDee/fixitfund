@@ -6,5 +6,5 @@ export async function POST(req, res) {
     const { projectID, donationAmount } = body;
     const msg = await updatedonated(projectID, donationAmount);
     console.log(msg);
-    return NextResponse.json({ msg : "succesfully updated"})
+    return NextResponse.json(msg);
 }

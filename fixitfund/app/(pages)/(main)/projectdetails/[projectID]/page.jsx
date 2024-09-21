@@ -1,5 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import Link from 'next/link';
+
 
 export default function ProjectDetails({params}){
     const [data, setData] = useState(null);
@@ -14,6 +17,23 @@ export default function ProjectDetails({params}){
   const [userClass, setUserClass] = useState("");
   const [userID, setUserID] = useState("");
     const projectId = params.projectID;
+
+    useEffect(() => {
+        const auth = getAuth();
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in
+                setUserID(user.uid);
+            } else {
+                // User is signed out
+                setUserID("");
+            }
+        });
+
+        // Cleanup subscription on unmount
+        return () => unsubscribe();
+    }, []);
+
     useEffect(() => {
         const fetchData = async () => {
           try {
@@ -31,24 +51,26 @@ export default function ProjectDetails({params}){
             setPicUrl(projectResult.PictureURL);
             setStatus(projectResult.Status);
             setTag(projectResult.Tag);
-            setCost(projectResult.cost);
-            setDonated(projectResult.Donated);
-            setUserID(projectResult.UID);
+            setCost(parseFloat(projectResult.cost?.$numberDecimal || 0));
+            setDonated(parseFloat(projectResult.Donated?.$numberDecimal || 0));
+
+  
       
-        const userResponse = await fetch(`/api/getuserclass?userID=${projectResult.UID}`);
-      if (!userResponse.ok) {
-        throw new Error('Network response was not ok for user status');
-      }
-            // Then, fetch user class using the UID from project details
-            const userResult = await  userResponse.json();
-            if (userResult.status !== undefined) {
-              setUserClass(userResult.status);
-              console.log("User class:", userResult.status);
-            } else {
-              console.log("User class not found");
-              setUserClass(null);
+         // Only fetch user class if user is authenticated
+         if (userID) {
+            const userResponse = await fetch(`/api/getuserclass?userID=${userID}`);
+            if (!userResponse.ok) {
+                throw new Error('Network response was not ok for user status');
             }
-      
+            const userResult = await userResponse.json();
+            if (userResult.status !== undefined) {
+                setUserClass(userResult.status);
+                console.log("User class:", userResult.status);
+            } else {
+                console.log("User class not found");
+                setUserClass(null);
+            }
+        }
       
           } catch (error) {
             console.log(error);
@@ -115,7 +137,7 @@ return (
             <img 
                 src={picUrl}
                 alt="Campaign Image" 
-                className="w-full h-auto mb-6 rounded-lg"
+                className="w-full mb-6 rounded-lg h-96"
             />
             
             <div className="w-full bg-white shadow-md rounded-lg overflow-hidden">
