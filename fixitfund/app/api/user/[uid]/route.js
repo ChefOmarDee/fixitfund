@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { fetchUserByUID } from "../../../_lib/mongo/utils/getuser"; // Adjust your import
+// import { GetUsersProjects } from "../../../_lib/mongo/utils/getusersprojects"; // Adjust your import
 
 // API route for fetching user data by UID
 export async function GET(req, { params }) {
@@ -11,7 +12,9 @@ export async function GET(req, { params }) {
 
     // Find the user by UID in MongoDB
     const userData = await fetchUserByUID(uid);
+    // const userProjects=await GetUsersProjects(uid);
     console.log("///////////////////")
+    // console.log(userProjects)
     console.log(userData);
     console.log("///////////////////") 
     if (!userData) {

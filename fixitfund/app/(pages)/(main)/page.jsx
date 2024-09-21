@@ -59,6 +59,7 @@ export default function Home() {
       const data = await response.json();
       console.log(data.data)
       setProjects(data.data);
+      console.log(data.data)
     } catch (error) {
       console.error('Error fetching projects:', error);
     } finally {
@@ -99,7 +100,8 @@ export default function Home() {
         },
       });
       const data = await response.json();
-      if(data.status === undefined){
+      console.log("data", data)
+      if(data.status === null){
         router.push("/newuserwelcome");
       }
     } catch (error) {
@@ -110,7 +112,7 @@ export default function Home() {
   }
 
   const redirectToProject = (projectId) => {
-    router.push(`/project/${projectId}`);
+    router.push(`/projectdetails/${projectId}`);
   }
   
   useEffect(() => {
@@ -140,6 +142,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!isNotLoggedIn){
+      console.log("hi")
       CheckUser();
     }
   }, [isNotLoggedIn])
@@ -261,7 +264,7 @@ export default function Home() {
       {!loading &&
       <div className={'min-h-[100%] bg-[#FFFAF1] hover:cursor-pointer max-md:grid-cols-1 grid grid-cols-3 overflow-y-auto'}>
           {projectArray.length !== 0 &&  projectArray.map((project) => (
-          <div key={project.ProjectId} onClick={() => redirectToProject(project.ProjectId)} className="w-[25vw] rounded-xl mx-auto h-[40vh] hover:bg-gray-300 transition-colors duration-300 max-md:w-[85vw] max-md:h-[45vh] mt-[2vh] overflow-hidden bg-gray-200">
+          <div key={project.ProjectId} onClick={() => redirectToProject(project.projectId)} className="w-[25vw] rounded-xl mx-auto h-[40vh] hover:bg-gray-300 transition-colors duration-300 max-md:w-[85vw] max-md:h-[45vh] mt-[2vh] overflow-hidden bg-gray-200">
             <img 
               src={project.pictureUrl} 
               alt={project.Title} 
