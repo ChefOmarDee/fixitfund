@@ -23,6 +23,7 @@ export default function ProjectDetails({params}){
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
                 // User is signed in
+                console.log("loggedin")
                 setUserID(user.uid);
             } else {
                 // User is signed out
@@ -38,12 +39,13 @@ export default function ProjectDetails({params}){
         const fetchData = async () => {
           try {
             // First, fetch project details
-            const projectResponse = await fetch(`/api/getallprojectdetails?projectID=${projectId}`);
+            const projectResponse = await fetch(`/api/getprojectdetails?projectID=${projectId}`);
             if (!projectResponse.ok) {
               throw new Error('Network response was not ok for project details');
             }
-            const projectResult = await projectResponse.json();
-            console.log(projectResult);
+            let projectResult = await projectResponse.json();
+            projectResult = projectResult.projectDetails;
+            console.log(projectResult.projectDetails.Title);
             console.log(projectResult.UID);
             setData(JSON.stringify(projectResult));
             setTitle(projectResult.Title);
@@ -63,6 +65,7 @@ export default function ProjectDetails({params}){
                 throw new Error('Network response was not ok for user status');
             }
             const userResult = await userResponse.json();
+            // console.log(userResult)
             if (userResult.status !== undefined) {
                 setUserClass(userResult.status);
                 console.log("User class:", userResult.status);
@@ -81,9 +84,9 @@ export default function ProjectDetails({params}){
         fetchData();
       }, [projectId]); // Add projectId as a dependency if it's not constant
   const renderActionButton = () => {
-    switch(status.toLowerCase()) {
+    switch(status?.toLowerCase()) {
         case 'open':
-            if (userClass.toLowerCase() === 'worker') {
+            if (userClass.toLowerCase() === 'wor') {
                 return (
                     <button className="w-full py-2 px-4 bg-[#f17418] hover:bg-[#d95f00] text-white font-bold rounded-lg transition duration-200">
                         Claim This Project
@@ -111,7 +114,7 @@ export default function ProjectDetails({params}){
 };
 
 const renderProgressBar = () => {
-    if (status.toLowerCase() === 'in progress') {
+    if (status?.toLowerCase() === 'in progress') {
         const progress = (donated / cost) * 100;
         return (
             <>
