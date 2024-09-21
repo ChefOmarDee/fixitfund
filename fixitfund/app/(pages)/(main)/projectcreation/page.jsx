@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Camera, MapPin, Tag, FileText, Type } from 'lucide-react';
+import { auth } from '../../../_lib/firebase';
 
 const UploadForm = () => {
   const [title, setTitle] = useState('');
@@ -12,7 +13,8 @@ const UploadForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
   const router = useRouter();
-
+  const user = auth.currentUser;
+  console.log(user);
   useEffect(() => {
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition((position) => {
