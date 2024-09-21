@@ -6,7 +6,9 @@ import { onAuthStateChanged } from 'firebase/auth';
 import ProgressBar from '@ramonak/react-progress-bar';
 import { auth } from '../../_lib/firebase';
 const Select = dynamic(() => import('react-select'), { ssr: false });
+import mapboxgl from 'mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
 
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY;
 
 export default function Home() {
   const testingData = [
@@ -38,6 +40,13 @@ export default function Home() {
     { value: 'closed', label: 'Closed'},
     { value: 'Any', label: 'Any'}
   ]
+
+  const mapContainer = useRef(null);
+  const map = useRef(null);
+  const [lng, setLng] = useState(-80.1002);
+  const [lat, setLat] = useState(26.3746);
+  const [zoom, setZoom] = useState(6);
+
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -137,13 +146,39 @@ export default function Home() {
     }
   })
 
+    useEffect(() => {
+    if (map.current) return; // initialize map only once
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: 'mapbox://styles/mapbox/streets-v12',
+      center: [lng, lat],
+      zoom: zoom,
+    });
+
+    // Add navigation control (the +/- zoom buttons)
+    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+    // Create markers for each project
+    projectArray.forEach((project) => {
+      if (project.Longitude && project.Latitude) {
+        new mapboxgl.Marker()
+          .setLngLat([project.Longitude, project.Latitude])
+          .setPopup(new mapboxgl.Popup().setHTML(`<h3>${project.Title}</h3><p>${project.Description}</p>`))
+          .addTo(map.current);
+      }
+    });
+  }, [projectArray, lng, lat, zoom]);
+
   return (
     <div className="bg-[#FFFAF1] overflow-x-hidden text-black h-[100%] pb-[20px] w-[100%] absolute mt-[10vh] top-0">
       <div className={"flex bg-[url('../homeBg.jpg')] bg-cover bg-no-repeat justify-center items-center flex-col h-[50vh]"}>
         <h1 className={'text-white text-[60px] font-bold'}>Fix-It-Fund</h1> 
         <h3 className ={'text-white text-[20px] font-medium max-md:text-[16px] max-md:text-center'} >Your one stop shop for improving your community</h3>
       </div>
-      <div className = {'bg-[#FFFAF1] flex flex-row items-center py-4 justify-evenly'}>
+      <div className="w-full bg-[#94DBFF] py-8">
+            <div ref={mapContainer} className="map-container mx-auto rounded-lg shadow-lg" style={{ height: '500px', width: '80%', maxWidth: '1200px' }} />
+          </div>
+          <div className = {'bg-[#FFFAF1] flex flex-row items-center py-4 justify-evenly'}>
         <Select
         closeMenuOnSelect={false}
         options={statusOptions}
