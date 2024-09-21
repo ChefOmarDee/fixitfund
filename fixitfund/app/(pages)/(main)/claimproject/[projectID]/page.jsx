@@ -1,12 +1,15 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import { DollarSign, FileText, MapPin, Tag, User } from 'lucide-react';
+import { auth } from '../../../../_lib/firebase'; // Import Firebase auth
+import { onAuthStateChanged } from 'firebase/auth'; // Listen for auth state
 
 const ClaimProject = ({ params }) => {
   const [donationAmount, setDonationAmount] = useState('');
-  const [projectDetails, setProjectDetails] = useState(null); // New state for project details
+  const [projectDetails, setProjectDetails] = useState(null); 
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [userUID, setUserUID] = useState(null); // New state for storing UID
 
   useEffect(() => {
     // Fetch project details when the component mounts
@@ -16,7 +19,7 @@ const ClaimProject = ({ params }) => {
         const data = await response.json();
 
         if (response.ok) {
-          setProjectDetails(data); // Set the fetched project details
+          setProjectDetails(data);
         } else {
           throw new Error(data.error || 'Failed to fetch project details');
         }
@@ -26,7 +29,18 @@ const ClaimProject = ({ params }) => {
     };
 
     fetchProjectDetails();
-  }, [params.projectID]); // Fetch when projectID changes
+
+    // Fetch UID of logged-in user
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        setUserUID(currentUser.uid); // Set the UID when user is logged in
+      } else {
+        setMessage("No user logged in");
+      }
+    });
+
+    return () => unsubscribe();
+  }, [params.projectID]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,6 +56,7 @@ const ClaimProject = ({ params }) => {
         body: JSON.stringify({
           projectId: params.projectID,
           donationAmount: parseFloat(donationAmount),
+          userUID, // Include the UID in the request body
         }),
       });
 
