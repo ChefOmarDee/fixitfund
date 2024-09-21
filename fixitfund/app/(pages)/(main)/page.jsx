@@ -141,11 +141,10 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (!isNotLoggedIn){
-      console.log("hi")
+    if (auth.currentUser !== null){
       CheckUser();
     }
-  }, [isNotLoggedIn])
+  }, [])
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
