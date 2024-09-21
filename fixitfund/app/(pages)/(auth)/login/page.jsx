@@ -25,6 +25,7 @@ const Login = () => {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredentials) => {
         const uid = userCredentials.user.uid;
+        console.log(uid);
         userCredentials.user.getIdToken().then(token => {
             localStorage.setItem('Token', token);
         }).catch((error) =>{

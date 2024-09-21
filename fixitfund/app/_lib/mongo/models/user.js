@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema(
       default: [], // initializes as an empty array
     },
     totalDonations: {
-      type: Number,
+      type: mongoose.Decimal128,
       default: 0,
     },
     totalJobsOpened: {

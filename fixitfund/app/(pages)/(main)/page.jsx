@@ -1,6 +1,8 @@
 "use client"
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
+import { onAuthStateChanged } from 'firebase/auth';
 import ProgressBar from '@ramonak/react-progress-bar';
 import { auth } from '../../_lib/firebase';
 import mapboxgl from 'mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
@@ -23,14 +25,15 @@ export default function Home() {
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/getProjects", {
+      const response = await fetch("/api/getallprojectdetails", {
         method: "GET",
         headers: {
           'Authorization': `Bearer ${token}`
         },
       });
       const data = await response.json();
-      setProjects(data);
+      console.log(data.data)
+      setProjects(data.data);
     } catch (error) {
       console.error('Error fetching projects:', error);
     } finally {
@@ -38,17 +41,36 @@ export default function Home() {
     }
   };
 
-  const CheckUser = async () => {
+  const fetchProjectsWithQuery = async() => {
+    setLoading(true);
     try {
-      const response = await fetch("/getUser", {
+      const response = await fetch(`/api/filterprojects/:Status=${statusInput}`, {
         method: "GET",
         headers: {
           'Authorization': `Bearer ${token}`
         },
       });
       const data = await response.json();
-      if(data.Class === undefined){
-        router.push("newuserwelcome");
+      setProjects(data.data);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const CheckUser = async () => {
+    try {
+      const userId = auth.currentUser.uid;
+      const response = await fetch(`/api/getuserclass?userID=${userId}`, {
+        method: "GET",
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+      });
+      const data = await response.json();
+      if(data.status === undefined){
+        router.push("/newuserwelcome");
       }
     } catch (error) {
       console.error('Error fetching projects:', error);
@@ -66,7 +88,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if(!isNotLoggedIn){
+    if (!isNotLoggedIn){
       CheckUser();
     }
   }, [isNotLoggedIn]);
@@ -95,7 +117,7 @@ export default function Home() {
   }, [projectArray, lng, lat, zoom]);
 
   return (
-    <div className="bg-[#FFFAF1] text-black h-[100%] w-[100%] absolute mt-[10vh] top-0">
+    <div className="bg-[#FFFAF1] overflow-x-hidden text-black h-[100%] w-[100%] absolute mt-[10vh] top-0">
       <div className={"flex bg-[url('../homeBg.jpg')] bg-cover bg-no-repeat justify-center items-center flex-col h-[50vh]"}>
         <h1 className={'text-white text-[60px] font-bold'}>Fix-It-Fund</h1> 
         <h3 className ={'text-white text-[20px] font-medium'}>Your one stop shop for improving your community</h3>
@@ -104,7 +126,7 @@ export default function Home() {
         <h1 className='text-center font-bold text-[40px]'>Home</h1>
       </div>
       {loading &&
-        <div className={'h-[100%] w-[100%] text-[100px] bg-[#FFFAF1] flex text-center justify-center align-center'}>
+        <div className={'h-[100%] w-[100%] text-[100px] overflow-x-hidden max-md:text-[50px] bg-[#FFFAF1] flex text-center justify-center align-center'}>
           <h1 className="mt-[10vh] font-bold">loading...</h1>
         </div>
       }

@@ -7,6 +7,7 @@ const DonationForm = ({ params }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const router = useRouter();  // Initialize router
+  const [goalmet, setGoalMet] = useState("");
 
   const handleDonation = async (e) => {
     e.preventDefault();
@@ -35,7 +36,9 @@ const DonationForm = ({ params }) => {
       if (!response.ok) {
         throw new Error(data.error || 'Failed to process donation');
       }
-
+      if (data.goalm == true){
+        setGoalMet("THANK YOU, GOAL HAS BEEN MET!")
+      }
       setSuccess('Donation successful! Thank you for your contribution.');
       setAmount('');
 
@@ -71,7 +74,7 @@ const DonationForm = ({ params }) => {
             />
           </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
-          {success && <p className="text-green-500 text-sm">{success}</p>}
+          {success && <p className="text-green-500 text-sm">{success}{goalmet}</p>}
           <button
             type="submit"
             className="w-full py-2 px-4 bg-[#f17418] hover:bg-[#d95f00] text-white font-bold rounded-lg transition duration-200"
