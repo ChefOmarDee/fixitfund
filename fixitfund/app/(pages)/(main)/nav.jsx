@@ -85,10 +85,10 @@ const Navbar = ({children}) => {
 			<div className="justify-between flex space-x-6 items-center">
 				{isNotLoggedIn && 
 					<>
-						<Link href='/signin'>
+						<Link href='/signup'>
 							<div className="font-bold text-lg">Sign up</div>
 						</Link>
-						<Link href='/signup'>
+						<Link href='/login'>
 							<div className="font-bold text-lg rounded-xl bg-[#019ca0] cursor-pointer hover:bg-[#49bfc3] px-3 py-2">Log in</div>
 						</Link>
 					</>
@@ -133,7 +133,7 @@ const Navbar = ({children}) => {
 				<Link href='/signup' onClick={closeMenu}>
 					<div className="font-bold text-lg py-2">Sign Up</div>
 				</Link>
-				<Link href='/signin' onClick={closeMenu}>
+				<Link href='/login' onClick={closeMenu}>
 					<div className="font-bold text-lg rounded-xl w-3/5 mt-[3vh] text-center bg-[#019ca0] cursor-pointer px-3 py-2">Sign In</div>
 				</Link>
 				</>
