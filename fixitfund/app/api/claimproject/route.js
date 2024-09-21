@@ -10,7 +10,8 @@ export async function POST(req) {
         // Log the received data to the console
         console.log('Received Project ID:', projectId);
         console.log('Donation AmountNeeded:', donationAmount);
-        await ClaimProject(projectId, donationAmount)
+        const wid="222"
+        await ClaimProject(projectId, donationAmount, wid)
         // Send a response back to the frontend
         return NextResponse.json({ message: 'Data received and logged successfully' }, { status: 200 });
     } catch (error) {

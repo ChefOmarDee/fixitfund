@@ -1,11 +1,11 @@
 import { connectToDatabase } from "../connection/connection.js";
 import { Project } from "../models/project.js";
 
-export async function ClaimProject(projectID, cost) { 
+export async function ClaimProject(projectID, cost, wid) { 
   await connectToDatabase();
 
   try {
-    // Find the project by projectId only if its status is "open", and update both the cost and status
+    // Find the project by projectId only if its status is "open", and update cost, status, and wid
     const updatedProject = await Project.findOneAndUpdate(
       { 
         projectId: projectID,    // Find the project with the matching projectID
@@ -14,7 +14,8 @@ export async function ClaimProject(projectID, cost) {
       { 
         $set: { 
           cost: cost,            // Update the cost field to the new cost value
-          status: "in progress"  // Update the status to "in progress"
+          status: "in progress", // Update the status to "in progress"
+          wid: wid                // Update the WID field to the new WID value
         } 
       },
       { new: true }              // Return the updated document
