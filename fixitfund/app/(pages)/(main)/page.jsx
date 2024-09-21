@@ -25,7 +25,7 @@ export default function Home() {
     } 
   ]
   let [projectArray, setProjects] = useState([]);
-  let [loading, setLoading] = useState(false);
+  let [loading, setLoading] = useState(true);
   let [statusInput, setStatus] = useState('');
   let [classInput, setClass] = useState('');
   const router = useRouter();
@@ -113,9 +113,7 @@ export default function Home() {
           'Authorization': `Bearer ${token}`
         },
       });
-      console.log(response);
       const data = await response.json();
-      console.log("CheckUser", data);
       if(data.status === undefined){
         router.push("/newuserwelcome");
       }
@@ -154,7 +152,7 @@ export default function Home() {
   })
 
   return (
-    <div className="bg-[#FFFAF1] text-black h-[100%] w-[100%] absolute mt-[10vh] top-0">
+    <div className="bg-[#FFFAF1] overflow-x-hidden text-black h-[100%] w-[100%] absolute mt-[10vh] top-0">
       <div className={"flex bg-[url('../homeBg.jpg')] bg-cover bg-no-repeat justify-center items-center flex-col h-[50vh]"}>
         <h1 className={'text-white text-[60px] font-bold'}>Fix-It-Fund</h1> 
         <h3 className ={'text-white text-[20px] font-medium max-md:text-[16px] max-md:text-center'} >Your one stop shop for improving your community</h3>
@@ -165,7 +163,7 @@ export default function Home() {
         options={statusOptions}
         instanceId={useId()}
         onChange={handleStatusChange}
-        className={'w-[15vw] max-md:w-[30vw]'}
+        className={'w-[15vw] max-md:w-[25vw]'}
         placeholder="Status Filter"
         />
         <h1 className='text-center font-bold text-[40px]'>Home</h1>
@@ -173,13 +171,13 @@ export default function Home() {
         closeMenuOnSelect={false}
         instanceId={useId()}
         onChange={handleClassChange}
-        className='w-[15vw] max-md:w-[30vw]'
+        className='w-[15vw] max-md:w-[25vw]'
         options={classOptions}
         placeholder="Class Filter"
         />
       </div>
       {loading &&
-        <div className={'h-[100%] w-[100%] text-[100px] bg-[#FFFAF1] flex text-center justify-center align-center'}>
+        <div className={'h-[100%] w-[100%] text-[100px] overflow-x-hidden max-md:text-[50px] bg-[#FFFAF1] flex text-center justify-center align-center'}>
           <h1 className="mt-[10vh] font-bold">loading...</h1>
         </div>
       }
