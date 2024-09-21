@@ -1,12 +1,6 @@
 import { AddNewUser } from "../../_lib/mongo/utils/addnewuser";
 import { NextResponse } from "next/server";
 
-export const config = {
-    api: {
-      bodyParser: false,
-    },
-  };
- 
 export async function POST(req) {
     const data = await req.json();
     console.log(data)

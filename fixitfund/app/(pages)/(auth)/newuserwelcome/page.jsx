@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useId } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LogIn, CircleUser, UserPen} from 'lucide-react';
 import { toast, ToastContainer } from 'react-toastify';
 import { useRouter } from 'next/navigation';
@@ -13,18 +13,19 @@ const NewUserWelcome = () => {
     const [accountType, setType] = useState('');
     const router = useRouter();
     const [token, setToken] = useState('');
-    if(!auth.currentUser){
-        return router.push("/");
-    }
-    const userId = auth.currentUser.uid;
-    const userEmail = auth.currentUser.email;
-
     useEffect(() => {
         if (typeof window !== "undefined") {
             const savedToken = localStorage.getItem("Token");
             setToken(savedToken);
         }
     }, []);
+    if(!auth.currentUser){
+        return router.push("/");
+    }
+    const userId = auth.currentUser.uid;
+    const userEmail = auth.currentUser.email;
+
+    
 
     const classOptions = [
         { value: 'civ', label: 'Civilian'},
@@ -74,6 +75,7 @@ const NewUserWelcome = () => {
             console.error('Error in post request:', error);
           } 
     }
+    const uniqueId = `accountTypeSelect-${Date.now()}`;
 
   return (
     <div className="min-h-screen bg-[#FFFAF1] flex items-center justify-center">
@@ -120,7 +122,7 @@ const NewUserWelcome = () => {
               id="accountType"
               className="w-full p-3 border border-gray-300 text-black rounded-md focus:ring-purple-500 focus:border-purple-500"
               placeholder="Select Account Type"
-              instanceId={useId()}
+              instanceId={uniqueId}
                 options={classOptions}
                 closeMenuOnSelect={true}
               value={accountType}
