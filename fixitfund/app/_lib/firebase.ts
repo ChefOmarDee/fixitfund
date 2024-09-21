@@ -1,8 +1,9 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import dotenv from "dotenv";
-import path from "path"
-dotenv.config({ path: path.resolve(__dirname, '..', '..' + '/.env') });
+
+import dotenv from 'dotenv'
+
+dotenv.config();
 
 // Your web app's Firebase configuration
 const firebaseConfig = JSON.parse(process.env.NEXT_PUBLIC_FIREBASE_CONFIG);
