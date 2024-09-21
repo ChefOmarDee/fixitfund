@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Mail, Lock, LogIn } from 'lucide-react';
 import { signInWithEmailAndPassword, signInWithPopup } from '@firebase/auth';
-import { auth } from '../../../_lib/firebase';
+import { auth, provider } from '../../../_lib/firebase';
 import { ToastContainer, toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import 'react-toastify/dist/ReactToastify.css';
@@ -10,7 +10,7 @@ import 'react-toastify/dist/ReactToastify.css';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const router = useRouter;
+  const router = useRouter();
 
   function LoginWithEmail(event) {
     event.preventDefault();
@@ -31,17 +31,13 @@ const Login = () => {
             alert(error.message);
         })
         
-        toast.success("Success !", {
-            position: toast.POSITION.TOP_RIGHT,
-          });
+        toast.success("Success !");
         setTimeout(() => {
             router.push(`/`);
           }, 1000);
       })
       .catch((error) => {
-        return toast.error(error.message, {
-            position: toast.POSITION.TOP_RIGHT,
-        });
+        return toast.error(error.message);
       });
   }
 
@@ -53,26 +49,21 @@ const Login = () => {
         userCredentials.user.getIdToken().then(token => {
             localStorage.setItem("Token", token);
         }).catch((error) =>{
-            return toast.error(error.message, {
-                position: toast.POSITION.TOP_RIGHT,
-            });
+            return toast.error(error.message);
         })
 
-        toast.success("Success !", {
-            position: toast.POSITION.TOP_RIGHT,
-          });
+        toast.success("Success !");
           setTimeout(() => {
             router.push("/");
           }, 1000);
     }).catch((error) =>{
-        return toast.error(error.message, {
-            position: toast.POSITION.TOP_RIGHT,
-        });
+        return toast.error(error.message);
     })
   }
 
   return (
     <div className="min-h-screen bg-[#FFFAF1] flex items-center justify-center">
+        <ToastContainer />
       <div className="bg-white shadow-lg rounded-lg max-w-md w-full p-8">
         <h1 className="text-3xl font-bold text-center text-black mb-6">Sign In</h1>
         <form className="space-y-6">

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { LogIn, CircleUser, UserPen} from 'lucide-react';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -30,9 +30,7 @@ const NewUserWelcome = () => {
         if(name.trim() === "" || accountType.trim() === ""){
             setName("");    
             setType("");
-            return toast.error("Please do not leave inputs blank !", {
-                position: toast.POSITION.TOP_RIGHT,
-            });
+            return toast.error("Please do not leave inputs blank !");
         }
 
         try {
@@ -42,7 +40,7 @@ const NewUserWelcome = () => {
                 LName: lastName
             }
             const response = await fetch("/postUserInformation", {
-              method: "Post",
+              method: "Patch",
               headers: {
                 'Authorization': `Bearer ${token}`
               },
@@ -60,6 +58,7 @@ const NewUserWelcome = () => {
 
   return (
     <div className="min-h-screen bg-[#FFFAF1] flex items-center justify-center">
+        <ToastContainer/>
       <div className="bg-white shadow-lg rounded-lg max-w-md w-full p-8">
         <h1 className="text-3xl font-bold text-center text-black mb-6">Please Select To Continue</h1>
         <form className="space-y-6">
