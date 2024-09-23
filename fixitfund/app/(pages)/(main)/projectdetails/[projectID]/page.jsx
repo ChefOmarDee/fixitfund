@@ -9,8 +9,6 @@ import "mapbox-gl/dist/mapbox-gl.css";
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY;
 
 export default function ProjectDetails({ params }) {
-	console.log(mapboxgl.accessToken); // should print your API key
-
 	const [data, setData] = useState(null);
 	const [error, setError] = useState(null);
 	const [title, setTitle] = useState("");
@@ -32,7 +30,7 @@ export default function ProjectDetails({ params }) {
 		const auth = getAuth();
 		const unsubscribe = onAuthStateChanged(auth, (user) => {
 			if (user) {
-				console.log("loggedin");
+				console.log("logged in");
 				setUserID(user.uid);
 			} else {
 				setUserID("");
@@ -99,6 +97,14 @@ export default function ProjectDetails({ params }) {
 	}, [longitude, latitude]);
 
 	const renderActionButton = () => {
+		if (!userID) {
+			return (
+				<div className="text-red-500">
+					You must be logged in to donate or claim a project.
+				</div>
+			);
+		}
+
 		switch (status?.toLowerCase()) {
 			case "open":
 				if (userClass.toLowerCase() === "wor") {

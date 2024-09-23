@@ -6,12 +6,14 @@ import Logo from "./a.jpeg";
 import { useState, useEffect } from "react";
 import { FaBars, FaTimes } from "react-icons/fa";
 import { auth } from "../../_lib/firebase";
+import { signOut } from "firebase/auth"; // Import signOut function
 import { usePathname } from "next/navigation";
 
 const Navbar = ({ children }) => {
 	const [isMobile, setIsMobile] = useState(false);
-	const [isOpen, setIsOpen] = useState(false); //used for HAMBURGER
+	const [isOpen, setIsOpen] = useState(false);
 	const [navbarHeight, setNavbarHeight] = useState("h-24");
+	const [loading, setLoading] = useState(false); // Loading state for sign-out
 	const pathname = usePathname();
 
 	const user = auth.currentUser;
@@ -19,7 +21,6 @@ const Navbar = ({ children }) => {
 
 	useEffect(() => {
 		const handleResize = () => {
-			// determines if mobile
 			setIsMobile(window.innerWidth < 1025);
 		};
 
@@ -27,7 +28,7 @@ const Navbar = ({ children }) => {
 			if (isMobile) {
 				setNavbarHeight("h-16");
 			} else {
-				const scrollThreshold = 440; //scroll value
+				const scrollThreshold = 440;
 				if (window.scrollY > scrollThreshold) {
 					setNavbarHeight("h-16");
 				} else {
@@ -54,6 +55,17 @@ const Navbar = ({ children }) => {
 		setIsOpen(false);
 	};
 
+	const handleSignOut = async () => {
+		setLoading(true); // Set loading to true when starting sign out
+		try {
+			await signOut(auth);
+		} catch (error) {
+			console.error("Sign out error: ", error);
+		} finally {
+			setLoading(false); // Reset loading state
+		}
+	};
+
 	return (
 		<nav
 			className={`sticky top-0 w-full overflow-hidden h-[10vh] ${navbarHeight} bg-[#f17418] z-50 transition-all duration-300`}
@@ -74,17 +86,28 @@ const Navbar = ({ children }) => {
 					{!isMobile && (
 						<>
 							{!isNotLoggedIn && (
-								<Link href="/account">
-									<div
-										className={`font-bold text-lg text-black ${
-											pathname === "/account"
-												? "underline decoration-white"
-												: ""
+								<>
+									<Link href="/account">
+										<div
+											className={`font-bold text-lg text-black ${
+												pathname === "/account"
+													? "underline decoration-white"
+													: ""
+											}`}
+										>
+											Account
+										</div>
+									</Link>
+									<button
+										onClick={handleSignOut}
+										className={`font-bold text-lg text-black cursor-pointer ${
+											loading ? "opacity-50 cursor-not-allowed" : ""
 										}`}
+										disabled={loading} // Disable button when loading
 									>
-										Account
-									</div>
-								</Link>
+										{loading ? "Signing Out..." : "Sign Out"}
+									</button>
+								</>
 							)}
 							<Link href="/">
 								<div
@@ -128,7 +151,7 @@ const Navbar = ({ children }) => {
 				)}
 				{isMobile && (
 					<>
-						{isOpen && ( //panel closer
+						{isOpen && (
 							<div
 								className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-40 transition-opacity duration-300"
 								onClick={toggleMenu}
@@ -136,8 +159,7 @@ const Navbar = ({ children }) => {
 						)}
 						<div
 							className={`fixed top-0 right-0 w-3/4 h-full bg-[#f17418] shadow-xl z-50 flex flex-col p-4 transform transition-all duration-300 ease-in-out ${
-								//panel opener
-								isOpen ? "translate-x-0" : "translate-x-full" //conditional, isOpen = true -> translates element 0, false -> translates it to right
+								isOpen ? "translate-x-0" : "translate-x-full"
 							}`}
 						>
 							<div className="flex justify-end">
@@ -180,11 +202,25 @@ const Navbar = ({ children }) => {
 								</>
 							)}
 							{!isNotLoggedIn && (
-								<Link href="/projectcreation">
-									<div className="font-bold text-lg text-black bg-[#fff7db] w-3/5 mt-[3vh] text-center py-2 rounded-xl hover:bg-gray-400 cursor-pointer">
-										Create
-									</div>
-								</Link>
+								<>
+									<Link href="/projectcreation" onClick={closeMenu}>
+										<div className="font-bold text-lg text-black bg-[#fff7db] w-3/5 mt-[3vh] text-center py-2 rounded-xl hover:bg-gray-400 cursor-pointer">
+											Create
+										</div>
+									</Link>
+									<button
+										onClick={() => {
+											handleSignOut();
+											closeMenu();
+										}}
+										className={`font-bold text-lg text-black w-3/5 mt-[3vh] text-center py-2 rounded-xl hover:bg-gray-400 cursor-pointer ${
+											loading ? "opacity-50 cursor-not-allowed" : ""
+										}`}
+										disabled={loading} // Disable button when loading
+									>
+										{loading ? "Signing Out..." : "Sign Out"}
+									</button>
+								</>
 							)}
 						</div>
 					</>
