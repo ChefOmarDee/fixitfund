@@ -120,14 +120,29 @@ export default function Home() {
 			});
 
 			projectArray.forEach((project) => {
-				const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
-					`<strong>${project.title}</strong><br>${project.desc}`
+				const popupContent = document.createElement("div");
+				popupContent.innerHTML = `
+          <strong>${project.title}</strong><br>
+          ${project.desc}<br>
+          <button class="view-more-btn" data-project-id="${project.projectId}">Learn More</button>
+        `;
+
+				const popup = new mapboxgl.Popup({ offset: 25 }).setDOMContent(
+					popupContent
 				);
 
 				new mapboxgl.Marker()
 					.setLngLat([project.long, project.lat])
 					.setPopup(popup)
 					.addTo(map.current);
+			});
+
+			// Add click event listener to the map container
+			mapContainer.current.addEventListener("click", (e) => {
+				if (e.target.classList.contains("view-more-btn")) {
+					const projectId = e.target.getAttribute("data-project-id");
+					redirectToProject(projectId);
+				}
 			});
 		}
 	}, [projectArray]);
